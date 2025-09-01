@@ -55,7 +55,7 @@ async def read_root():
 
 # User Profile Endpoints
 
-@app.post("/users/")
+@app.post("/users/create")
 async def create_user(user: User):
    try:
       user_dict = user.dict()
