@@ -8,9 +8,17 @@ from pydantic import BaseModel
 from datetime import datetime
 from bson import ObjectId
 import uvicorn
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Digital Wallet", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware, # type: ignore
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 try:
     client = AsyncIOMotorClient(MONGO_URI)
@@ -58,6 +66,9 @@ async def read_root():
 @app.post("/users/create")
 async def create_user(user: User):
    try:
+      find_user = await users.find_one({"email": user.email})
+      if find_user:
+          return HTTPException(status_code=400, detail="User already exists")
       user_dict = user.dict()
       user_dict["created_at"] = datetime.now()
       user_dict["updated_at"] = datetime.now()
